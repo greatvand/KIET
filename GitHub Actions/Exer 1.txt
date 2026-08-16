@@ -1,0 +1,19 @@
+Scenario: The system report
+
+Your team needs an automated report on every runner that builds their code, because "it works on my machine" arguments keep wasting time. Write a new workflow called System Report that runs on every push and has two jobs.
+
+Job 1 — system-info
+
+Print the OS name and kernel version
+Print how much disk space is free
+Print the current date and time
+Install tree using apt-get
+Use tree to display the folder structure of the runner's home directory, limited to two levels deep
+
+Job 2 — tool-check
+
+Install jq using apt-get
+Create a file called report.json containing at least three key-value pairs of your choice
+Use jq to read one value out of that file and print it
+Print the installed versions of python3, git and jq, each on its own line
+Finish by printing "Report complete"
