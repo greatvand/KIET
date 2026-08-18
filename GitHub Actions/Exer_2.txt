@@ -1,0 +1,47 @@
+Scenario: The PR gatekeeper
+
+Your team wants a workflow that only runs checks when someone proposes a change, not on every single commit to every branch. Write a new workflow called PR Gatekeeper that:
+
+Triggers only on pull requests targeting the main branch
+Also allows the workflow to be triggered manually
+Has one job called checks that runs on the latest Ubuntu runner
+Prints which branch the PR is being merged into
+Prints the PR number
+Finishes by printing "Gatekeeper checks complete"
+
+
+Scenario: The nightly housekeeper
+
+Your team wants a workflow that tidies things up every night without anyone having to remember to run it, but they also want the option to trigger it by hand when testing changes. Write a new workflow called Nightly Housekeeper that:
+
+Triggers on a schedule that runs once every day at 2 AM UTC
+Also allows manual triggering
+Has one job called cleanup that runs on the latest Ubuntu runner
+Prints the current date and time
+Prints a message saying "Running nightly cleanup"
+Finishes by printing "Housekeeping complete"
+
+
+Scenario: The multi-trigger detective
+
+Your team keeps getting confused about which event caused a workflow to run. Write a new workflow called Trigger Detective that:
+
+Triggers on push, pull_request, and manual dispatch (workflow_dispatch)
+Has one job called detect that runs on the latest Ubuntu runner
+Prints the name of the event that triggered the run
+If the event is a push, additionally print the branch that was pushed to
+If the event is a pull_request, additionally print the source and target branches
+Finishes by printing "Detective work complete"
+
+
+Scenario: The release watcher
+
+Your team only wants heavy release-related jobs to run when code lands on main, either through a direct push or on a fixed weekly cadence to catch anything missed, while still keeping a manual override for emergencies. Write a new workflow called Release Watcher that:
+
+Triggers on push to the main branch only
+Also triggers on a schedule that runs every Monday at 9 AM UTC
+Also allows manual triggering
+Has one job called watch that runs on the latest Ubuntu runner
+Prints the event name that triggered the run
+Prints the current date and time
+Finishes by printing "Release watch complete"
