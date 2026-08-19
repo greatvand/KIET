@@ -1,0 +1,55 @@
+Scenario: The Python inspector
+
+Your team keeps arguing about which Python version the runner actually uses, because two developers got different results from the same script. Write a new workflow called Python Inspector that:
+
+Triggers on push and manual dispatch
+Has one job called inspect that runs on the latest Ubuntu runner
+Checks out the repository
+Sets up Python version 3.11 using a marketplace action
+Prints the Python version and the pip version
+Prints where the python binary is installed on the runner
+Finishes by printing "Inspection complete"
+
+
+Scenario: The checkout proof
+
+Your team keeps forgetting that a runner starts empty. Write a new workflow called Checkout Proof that:
+
+Triggers on push and manual dispatch
+Has one job called prove that runs on the latest Ubuntu runner
+Before checking out anything, prints the current folder path and lists its contents
+Then checks out the repository
+Lists the contents of the folder again
+Counts how many files are now present
+Finishes by printing "Proof captured"
+
+Write one line explaining what the two listings show.
+
+
+Scenario: The subfolder builder
+
+Your repository has a folder called app holding a small project, and the workflow file lives at the repository root. Write a new workflow called Subfolder Builder that:
+
+Triggers on push and manual dispatch
+Has one job called build that runs on the latest Ubuntu runner
+Sets a default working directory of app for all run steps
+Checks out the repository
+Sets up any runtime of your choice using a marketplace action
+Prints the current working directory
+Lists the files in that directory
+Finishes by printing "Build folder confirmed"
+
+Note in one line whether the checkout step was affected by the default working directory, and why.
+
+
+Scenario: The ordered pipeline
+
+Your team wants three stages that happen strictly in order, and the whole run must stop if the first one fails. Write a new workflow called Ordered Pipeline that:
+
+Triggers on push and manual dispatch
+Has three jobs called setup, verify and finish, all on the latest Ubuntu runner
+The setup job checks out the repository, sets up a runtime using a marketplace action, and prints "Setup done"
+The verify job runs only after setup succeeds, checks out the repository again, prints the runtime version and prints "Verify done"
+The finish job runs only after verify succeeds and prints "Pipeline finished"
+
+Then make the setup job fail deliberately and push again. Record what status the other two jobs are given, and write one line on why that status is not the same as failed.
