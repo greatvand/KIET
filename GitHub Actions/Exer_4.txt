@@ -1,0 +1,62 @@
+Scenario: The release train
+
+You have joined the platform team at a company that ships a Node service. The team runs a release train: work is proposed on pull requests, verified automatically, and anything that reaches main is packaged with a traceable build reference. Your task is to build the pipeline that runs this train.
+
+Create a repository with an app folder containing a small Node project, and a workflow called Release Train.
+
+Triggers
+
+The pipeline runs in three situations:
+  - a pull request is opened against main, or new commits are pushed to an open pull request against main
+  - code is pushed to main
+  - an engineer triggers it by hand
+
+Configuration
+
+Create a repository variable in the GitHub interface holding the deployment target, and a workflow-level variable holding the service name. The deployment target must be changeable without editing the workflow file.
+
+All run steps in the pipeline must operate inside the app folder without repeating a directory change in every step.
+
+Job 1: verify
+
+Runs on the latest Ubuntu runner.
+
+Check out the repository. Set up Node using a marketplace action. Install dependencies with a command suited to a pipeline rather than a laptop. Run the test suite.
+
+Print the Node version, the npm version and where the node binary lives on the runner, so that a failed build can be reproduced later.
+
+Job 2: package
+
+Runs only after verify has succeeded.
+
+Check out the repository and set up Node again.
+
+Build a release reference from the service name, the run number and the first seven characters of the commit SHA, joined by hyphens. Set it as a job-level variable so both later steps can read it.
+
+Create a folder called release containing:
+  - a file named after the release reference, holding the deployment target, the ref the build came from, the event that triggered it, who triggered it, and the build time in UTC
+  - a copy of at least one file from the app folder
+
+Install jq. Write a second file called manifest.json in the release folder holding the same fields as structured data, and prove it parses by reading one value back out with jq.
+
+Print the folder structure of release using tree, two levels deep.
+
+Job 3: announce
+
+Runs only after package has succeeded.
+
+Print the release reference, the deployment target and the service name.
+
+Print a different message depending on whether the run came from a pull request or from a push to main. A pull request run announces a candidate; a push to main announces a release.
+
+Finish by printing "Release train complete".
+
+What to hand in
+
+The repository link, plus the URLs of four runs:
+  - a run from an opened pull request
+  - a run from a further commit pushed to that same open pull request
+  - a run from a push to main
+  - a run after you changed the repository variable in the interface, with no commit in between
+
+Then break the test suite deliberately, push, and include the URL of that run as a fifth link.
