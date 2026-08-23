@@ -1,0 +1,55 @@
+Scenario: The incident switchboard
+
+Your release train from the previous exercise is running, but the team has a new problem. When something breaks in production at 2 AM, the on-call engineer has to run the pipeline by hand and wait through every stage just to get one piece of information. Nobody wants the full run. They want to choose what happens.
+
+The team has asked for a single workflow that behaves differently depending on who starts it, how they start it, and what they ask for. Build it.
+
+Create a workflow called Incident Switchboard in the same repository as your release train.
+
+Triggers
+
+The workflow runs on a push to main, on a pull request against main, and by hand.
+
+When started by hand, the engineer must be offered:
+  - a choice of severity, one of low, medium or high, defaulting to low
+  - a tickbox called deep_scan, defaulting to unticked
+  - a tickbox called skip_tests, defaulting to unticked
+  - a free text box called reason, with no default
+
+The run title must show the severity in capitals and the word SCAN when a deep scan was requested, so that the run list is readable without opening anything. A run started by a push or a pull request must still produce a sensible title.
+
+Job 1: triage
+
+Always runs.
+
+Prints the event that started the run, the ref, who started it and the run number.
+
+When the run was started by hand, prints the severity, whether a deep scan was asked for, whether tests were skipped, and the reason given. When it was not started by hand, prints a line saying the run was automatic and no reason was supplied.
+
+Prints a different line for each severity level. Low, medium and high must each produce their own message.
+
+Job 2: tests
+
+Runs after triage.
+
+Does not run at all when the engineer ticked skip_tests. It must still run for pushes and pull requests, where that tickbox does not exist.
+
+Checks out the repository, sets up Node, installs dependencies and runs the test suite inside the app folder.
+
+Job 3: scan
+
+Runs after triage.
+
+Only runs when a deep scan was requested, or when the severity is high. A high severity run gets the scan whether or not the box was ticked.
+
+Installs jq. Writes a file called scan.json holding the severity, the deep scan flag, the actor, the run number and the time in UTC. Reads two values back out with jq and prints them.
+
+Job 4: report
+
+Runs after both tests and scan, and must run even when one of them was skipped or failed.
+
+Prints whether the tests job succeeded, was skipped or failed. Prints the same for the scan job.
+
+Prints one summary line that differs depending on whether everything that ran was successful.
+
+Finishes by printing "Switchboard closed".
