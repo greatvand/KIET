@@ -1,0 +1,63 @@
+Scenario: The smart dispatcher
+
+Your incident switchboard from Exercise 5 works, but the on-call engineer still has to open every run to figure out what happened, and the workflow itself makes some decisions too bluntly — a single tickbox either runs a step or skips it, with no room for combined conditions or human-readable logic. The team wants the workflow to read more like a decision table, and the run list to be understandable at a glance.
+
+Build on the same repository as your release train and incident switchboard. Write a new workflow called Smart Dispatcher that:
+
+Triggers
+
+Triggers only on manual dispatch, with these inputs:
+  - a choice called risk_level, one of low, medium, high, critical, defaulting to low
+  - a tickbox called notify, defaulting to unticked
+  - a tickbox called dry_run, defaulting to unticked
+  - a free text box called owner, with no default
+  - a free text box called components, comma-separated, with no default
+
+Run naming
+
+Set a run-name that uses format() to show the risk level in capitals, the owner, and the word DRY-RUN when dry_run is ticked, so the run list is readable without opening anything. If dry_run is not ticked, the words DRY-RUN must not appear at all.
+
+Job 1: classify
+
+Runs on the latest Ubuntu runner.
+
+Prints the components list as given.
+Using contains(), prints whether the components list mentions "database".
+Using contains(), prints whether the components list mentions "auth".
+Using startsWith() and endsWith(), prints whether the owner's name starts with a capital letter check of your choice and whether components ends with a trailing comma (demonstrate both functions even if the answer is usually false).
+Using format(), print one sentence that reads naturally and includes the risk level, the owner and the component list all in a single format() call.
+
+Job 2: gate
+
+Runs after classify.
+
+Has three steps, each guarded by an if condition that combines at least two functions or operators (contains, startsWith, endsWith, ==, !=, &&, ||, !):
+  - a step that only runs when risk_level is high or critical AND components mentions "database"
+  - a step that only runs when risk_level is critical OR notify is ticked
+  - a step that only runs when dry_run is NOT ticked AND risk_level is not low
+
+Each step that runs must print a clear one-line message explaining which condition it satisfied.
+
+Job 3: execute
+
+Runs after gate, and must run even if gate was skipped or failed, using always().
+
+Step A deliberately fails when dry_run is ticked (simulate a forced non-zero exit), and is skipped entirely when dry_run is not ticked.
+Step B runs only when the previous step failed, using failure(), and prints "Dry run stopped before execution".
+Step C runs only when the previous two steps did not fail, using a combination of success() and failure() (or their absence), and prints "Execution proceeded".
+Step D runs unconditionally using always() and prints the job status summary: whether gate succeeded, was skipped, or failed, and whether execute itself is currently succeeding or has already failed.
+
+Job 4: close
+
+Runs after execute, and must run even if any prior job failed or was skipped, using always() at the job level condition.
+
+Prints one summary line built with format() that includes the risk level, the owner, whether it was a dry run, and the final word "CLOSED".
+Finishes by printing "Dispatcher closed".
+
+Then run the workflow four times and record the run URLs:
+  - risk_level low, notify unticked, dry_run unticked, components without "database" or "auth"
+  - risk_level critical, notify ticked, dry_run unticked, components containing "database"
+  - risk_level medium, notify unticked, dry_run ticked, components containing "auth"
+  - risk_level high, notify unticked, dry_run unticked, components containing "database"
+
+For each of the four runs, write one line explaining which gate steps ran and why, based only on the conditions above.
