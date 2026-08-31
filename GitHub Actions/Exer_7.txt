@@ -1,0 +1,50 @@
+Scenario: The pipeline archive
+
+Your release train and switchboard work fine, but the frontend team has a separate complaint. Every run rebuilds and reinstalls everything from zero, even when nothing changed, and once a run finishes there is no way to grab the test coverage or the built app without re-running the whole pipeline. They want a workflow that is fast when it can be, and that leaves something behind when it's done.
+
+Create a repository with a react-app folder holding a small React project (or reuse one you already have), and a workflow called Pipeline Archive.
+
+Triggers
+
+Triggers on push to main, on pull requests against main, and by hand.
+When triggered by hand, the engineer must be offered:
+  - a choice called build_mode, one of quick or full, defaulting to quick
+  - a tickbox called skip_cache, defaulting to unticked
+
+Configuration
+
+Create a repository variable in the GitHub interface holding a retention number (how many days artifacts should be kept), and a workflow-level variable holding the app's name.
+All run steps in the test-build job must operate inside the react-app folder without repeating a directory change in every step.
+
+Job 1: test-build
+
+Runs on the latest Ubuntu runner.
+
+Checks out the repository and sets up Node using a marketplace action.
+
+Caches node_modules, keyed by a hash of package-lock.json. The cache must be skipped entirely when the engineer ticked skip_cache, even if a matching cache exists.
+
+Installs dependencies only when there was no cache hit, using a command suited to a pipeline rather than a laptop.
+
+Runs the unit test suite with coverage enabled.
+
+Uploads the coverage output as an artifact, named using the app name variable and the run number, and set to expire after the number of days held in the repository variable.
+
+Builds the app, but only when build_mode is full or the event is a push to main; a quick run on a pull request skips the build step entirely and prints a line explaining that it was skipped.
+
+When the build step did run, uploads the build output as an artifact, named using the app name variable and the commit SHA.
+
+Prints a one-line summary using format() that states the app name, the build mode used (or "n/a — push" if the trigger wasn't manual), and whether the cache was used.
+
+Job 2: verify-archive
+
+Runs after test-build, and must run even if test-build's build step was skipped, using an appropriate job-level condition.
+
+Downloads the coverage artifact from the job above.
+Downloads the build artifact too, but only attempts this when the build actually happened in job 1; if there is nothing to download, this step must be skipped cleanly rather than failing the job. (Hint: you will need an output from job 1 that records whether the build ran, so job 2 can check it.)
+
+Uses tree to print the folder structure of whatever was downloaded, two levels deep.
+
+Installs jq. Writes a file called archive-manifest.json containing the app name, the run number, the retention days, and whether a build artifact was present. Reads one value back out with jq and prints it.
+
+Finishes by printing "Archive verified".
