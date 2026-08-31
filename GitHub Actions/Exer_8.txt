@@ -1,0 +1,73 @@
+Scenario: The on-call assistant
+
+Your team has adopted SenseTheLog to stop wasting time debugging CI failures by hand, but so far it has only been wired into a single job. The team wants it working across the whole pipeline: catching failures wherever they happen, telling the difference between a PR failure and a direct push failure, catching failures that span multiple jobs in one pass, and flagging when the same bug keeps coming back so it stops being treated as a one-off.
+
+Create a repository with an app folder holding a small Node project, and a workflow called On-Call Assistant.
+
+Triggers
+
+Triggers on push to main, on pull requests against main, and by hand.
+
+Permissions
+
+Set exactly the permissions this workflow needs at the top level. You will need enough to check out code, to let SenseTheLog read workflow run logs, and to let it post PR comments. Do not add anything beyond that.
+
+Configuration
+
+Add SENSETHELOG_API_KEY as a repository secret and reference it via secrets in the workflow, never hard-coded.
+
+All run steps in the lint, test and build jobs must operate inside the app folder without repeating a directory change in every step.
+
+Job 1: lint
+
+Runs on the latest Ubuntu runner.
+
+Checks out the repository and sets up Node using a marketplace action.
+
+Runs a lint command against the app folder.
+
+Job 2: test
+
+Runs on the latest Ubuntu runner, independently of lint (does not wait for it).
+
+Checks out the repository and sets up Node using a marketplace action.
+
+Runs the test suite.
+
+Job 3: build
+
+Runs on the latest Ubuntu runner, independently of lint and test.
+
+Checks out the repository and sets up Node using a marketplace action.
+
+Runs the build command.
+
+Job 4: analyze
+
+Runs after lint, test and build, and only when at least one of them failed.
+
+Uses the SenseTheLog action, configured so a single run of this job analyzes whichever of the three jobs failed rather than needing a separate analyze job per job.
+
+Reads out and prints, using the action's outputs, whether the failure is recurring and what the generated error signature is.
+
+Job 5: notify-on-recurrence
+
+Runs after analyze, and only when analyze's is-recurring output came back true.
+
+Prints a clear one-line message stating that this exact failure has happened before and should be treated as a priority fix rather than re-run and forgotten.
+
+What to demonstrate
+
+Run 1 — trigger the workflow from a pull request with all three jobs passing. Confirm the analyze job is skipped, and note where in the run this is visible.
+
+Run 2 — on that same pull request, break the test step only (leave lint and build passing), push the commit, and let the workflow run. Open the pull request and record what SenseTheLog posted as a comment, including its stated root cause and suggested fix.
+
+Run 3 — still without fixing the code, also break the lint step, push again, and confirm in the run's summary that SenseTheLog analyzed both failing jobs together in the one analyze job, not as two separate comments from two separate jobs.
+
+Run 4 — fix lint and test, push, confirm everything passes and the pull request comment updates rather than a new comment being added.
+
+Run 5 — on a fresh branch, reintroduce the exact same bug you broke in Run 2, open a new pull request, and let it fail again. Record whether is-recurring came back true, whether notify-on-recurrence ran, and what message it printed.
+
+Run 6 — push a commit directly to main (not through a pull request) that breaks the build step. Open the run and show where SenseTheLog's analysis appears given that there is no pull request to comment on.
+
+For each of the six runs, note the run URL and one line on what SenseTheLog did or did not do, and why.
