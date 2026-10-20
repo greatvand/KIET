@@ -1,0 +1,26 @@
+services:
+  servicename:
+    image: nginx:latest
+    # Optional: build an image from a Dockerfile
+    # build: .
+    # Optional: override the image's default command
+    # command: ["nginx", "-g", "daemon off;"]
+    # Optional: expose container port 80 on host port 8080
+    ports:
+      - "8080:80"
+    # Optional: environment variables
+    environment:
+      - APP_ENV=development
+    # Optional: mount volumes
+    volumes:
+      - app-data:/data
+
+  servicename2:
+    image: redis:alpine
+
+volumes:
+  app-data:
+
+networks:
+  default:
+    driver: bridge
